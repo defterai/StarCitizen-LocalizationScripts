@@ -1,0 +1,6 @@
+**/__pycache__
+/.vs
+/*.xlsx
+/*.xliff
+/allowed_codepoints.txt
+/global*.ini
