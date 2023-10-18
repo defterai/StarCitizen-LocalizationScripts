@@ -87,6 +87,7 @@ class LocalizationIni:
     __englishWordsExpr = re.compile(r'[A-Za-z]+')
     __languageWordsExpr = re.compile(r'[\w-]+', re.UNICODE)
     __parseExceptions = False
+    __interactiveMode = False
 
     @staticmethod
     def __RaiseException(exception):
@@ -94,7 +95,8 @@ class LocalizationIni:
             raise exception
         else:
             print("Error: {0}".format(exception))
-            input()
+            if LocalizationIni.__interactiveMode:
+                input()
 
     @staticmethod
     def __ParseKeyValue(line):
@@ -337,9 +339,13 @@ class LocalizationIni:
     def GetAnyLanguageWords(value):
         return set(LocalizationIni.__languageWordsExpr.findall(value.replace("\\n", " ")))
 
+    @staticmethod
     def SetEnableParseExceptions(enable):
         LocalizationIni.__parseExceptions = enable;
 
+    @staticmethod
+    def SetInteractiveMode(enabled):
+        LocalizationIni.__interactiveMode = enabled;
 
 class MultiLangXlsx:
 
@@ -370,116 +376,109 @@ class MultiLangXlsx:
         dataFrame = pandas.DataFrame(self.data, columns=[ 'A', 'B' ])
         dataFrame.to_excel(filename, sheet_name=sheetName, encoding='utf8', index=False, header=False)
 
+class LocalizationVerifier:
+    __lostNewlineExpr = re.compile(r'[^\\]\\[^n\\]')
+    __spaceBeforeNewlineExpr = re.compile(r' \\n')
+    __truths = set(['True', 'true', 1, '1'])
+    __verifyExceptions = False
+    __interactiveMode = False
 
-lostNewlineExpr = re.compile(r'[^\\]\\[^n\\]')
-spaceBeforeNewlineExpr = re.compile(r' \\n')
-truths = set(['True', 'true', 1, '1'])
+    @staticmethod
+    def __RaiseVerifyError(text):
+        if LocalizationVerifier.__verifyExceptions:
+            raise Exception(f'Error: {text}')
+        else:
+            print(f'Error: {text}')
+            if LocalizationVerifier.__interactiveMode:
+                input()
 
-def IsTruthCondition(value):
-    return value in truths
+    @staticmethod
+    def __NamedFormatToString(formatSet):
+        result = ''
+        for format in formatSet:
+            if result:
+                result += ', '
+            result += f'~{format[0]}({format[1]})'
+        return result
 
-def InteractiveNewline(interactiveMode):
-    if interactiveMode:
-        input('')
-    else:
-        print('')
-
-def NamedFormatToString(formatSet):
-    result = ''
-    for format in formatSet:
-        if result:
-            result += ', '
-        result += f'~{format[0]}({format[1]})'
-    return result
-
-def ReadCodepointCharactersSet(inputFilename, interactiveMode):
-    characterSet = set({ ' ', '\t' }); #, '\xa0'
-    try:
+    @staticmethod
+    def __ReadCodepointCharactersSet(inputFilename):
+        characterSet = set({ ' ', '\t' }); #, '\xa0'
         with codecs.open(inputFilename, "r", "utf-8") as inputFile:
             while True:
                 prefix = inputFile.read(2)
                 if not prefix:
                     break;
                 if prefix != '\\u':
-                    print("Found invalid prefix: {0}".format(prefix))
-                    InteractiveNewline()
+                    LocalizationVerifier.__RaiseVerifyError(f'Found invalid codepoint prefix: {prefix}')
                     return set()
                 codepoint = inputFile.read(4)
                 if not codepoint:
-                    print("Missing codepoint")
-                    InteractiveNewline()
+                    LocalizationVerifier.__RaiseVerifyError('Missing codepoint')
                     return set()
                 characterSet.add(chr(int(codepoint, 16)))
-    except Exception as err:
-        print("Parse codepoints file error: {0}".format(err))
-        InteractiveNewline()
-        return set()
-    return characterSet
+        return characterSet
 
-def VerifyTranslationIni(originalIni, translationIni, options):
-    interactiveMode = ('interactive_mode' in options) and options['interactive_mode'] in truths
-    lostNewline = ('lost_newline' in options) and options['lost_newline'] in truths
-    spaceBeforeNewline = ('space_before_newline' in options) and options['space_before_newline'] in truths
-    englishWordsMismatch = ('english_words_mismatch' in options) and options['english_words_mismatch'] in truths
+    def __init__(self, options):
+        self.lostNewline = ('lost_newline' in options) and options['lost_newline'] in LocalizationVerifier.__truths
+        self.spaceBeforeNewline = ('space_before_newline' in options) and options['space_before_newline'] in LocalizationVerifier.__truths
+        self.englishWordsMismatch = ('english_words_mismatch' in options) and options['english_words_mismatch'] in LocalizationVerifier.__truths
+        self.allowedCharacters = set()
+        if 'allowed_characters_file' in options:
+            allowedCharactersFile = options['allowed_characters_file']
+            if os.path.isfile(allowedCharactersFile):
+                print(f"Read allowed characters: {allowedCharactersFile}")
+                self.allowedCharacters = LocalizationVerifier.__ReadCodepointCharactersSet(allowedCharactersFile)
 
-    allowedCharacters = set()
-    if 'allowed_characters_file' in options:
-        allowedCharactersFile = options['allowed_characters_file']
-        if os.path.isfile(allowedCharactersFile):
-            print(f"Read allowed characters: {allowedCharactersFile}")
-            allowedCharacters = ReadCodepointCharactersSet(allowedCharactersFile, interactiveMode)
-    
-    for key, value in originalIni.getItems():
-        translateValue = translationIni.getKeyValue(key)
-        if translateValue != None:
-            if (len(translateValue) == 0) and (len(value) > 0):
-                print(f"Error: empty translation - {key}")
-                InteractiveNewline(interactiveMode)
-                continue
-            if len(allowedCharacters) > 0:
-                invalidCharacters = set()
-                for translateChar in translateValue:
-                    if (translateChar not in allowedCharacters) and (translateChar not in value):
-                       invalidCharacters.add(translateChar)
-                if len(invalidCharacters) > 0:
-                    print(f"Error: invalid characters in - {key}")
-                    print(f"Characters: {invalidCharacters}")
-                    InteractiveNewline(interactiveMode)
-            if not key.startswith("PU_") and not key.startswith("PH_PU_") and not key.startswith("DXSM_"):
-                origUnnamedFormats = LocalizationIni.GetUnnamedFormats(value)
-                translateUnnamedFormats = LocalizationIni.GetUnnamedFormats(translateValue)
-                if origUnnamedFormats != translateUnnamedFormats:
-                    print(f"Error: unnamed format seq change - {key}")
-                    print("Format original : ", origUnnamedFormats)
-                    print("Format translate : ", translateUnnamedFormats)
-                    InteractiveNewline(interactiveMode)
-            origNamedFormats = LocalizationIni.GetNamedFormats(value)
-            translateNamedFormats = LocalizationIni.GetNamedFormats(translateValue)
-            if not LocalizationIni.IsNamedFormatEquals(origNamedFormats, translateNamedFormats):
-                print(f"Error: named format seq change - {key}")
-                print("Format original : ", NamedFormatToString(origNamedFormats))
-                print("Format translate : ", NamedFormatToString(translateNamedFormats))
-                InteractiveNewline(interactiveMode)
-            if lostNewline:
-                count = len(lostNewlineExpr.findall(translateValue))
-                if count > 0:
-                    print(f"Note: lost newline \\n [{count}] - {key}")
-                    InteractiveNewline(interactiveMode)
-            if spaceBeforeNewline:
-                count = len(spaceBeforeNewlineExpr.findall(translateValue))
-                if count > 0:
-                    print(f"Note: space before \\n [{count}] - {key}")
-                    InteractiveNewline(interactiveMode)
-            if englishWordsMismatch:
-                translateCleanValue = LocalizationIni.GetCleanText(translateValue, translateUnnamedFormats, translateNamedFormats)
-                translateEngWords = LocalizationIni.GetEnglishWords(translateCleanValue)
-                if len(translateEngWords) > 0:
-                    cleanValue = LocalizationIni.GetCleanText(value, origUnnamedFormats, origNamedFormats)
-                    origEngWords = LocalizationIni.GetEnglishWords(cleanValue)
-                    if not translateEngWords.issubset(origEngWords):
-                        print(f"Note: use undefined word in - {key}")
-                        print("English words original : ", origEngWords)
-                        print("English words translate : ", translateEngWords)
-                        print("English words diff : ", translateEngWords.difference(origEngWords))
-                        InteractiveNewline(interactiveMode)
+    def verify(self, originalIni, translationIni):
+        for key, value in originalIni.getItems():
+            translateValue = translationIni.getKeyValue(key)
+            if translateValue != None:
+                if (len(translateValue) == 0) and (len(value) > 0):
+                    LocalizationVerifier.__RaiseVerifyError(f'empty translation - {key}')
+                    continue
+                if len(self.allowedCharacters) > 0:
+                    invalidCharacters = set()
+                    for translateChar in translateValue:
+                        if (translateChar not in self.allowedCharacters) and (translateChar not in value):
+                           invalidCharacters.add(translateChar)
+                    if len(invalidCharacters) > 0:
+                        LocalizationVerifier.__RaiseVerifyError(f'invalid characters in - {key}\nCharacters: {invalidCharacters}')
+                if not key.startswith("PU_") and not key.startswith("PH_PU_") and not key.startswith("DXSM_"):
+                    origUnnamedFormats = LocalizationIni.GetUnnamedFormats(value)
+                    translateUnnamedFormats = LocalizationIni.GetUnnamedFormats(translateValue)
+                    if origUnnamedFormats != translateUnnamedFormats:
+                        LocalizationVerifier.__RaiseVerifyError(f'unnamed format seq change - {key}\nFormat original : {origUnnamedFormats}\nFormat translate : {translateUnnamedFormats}')
+                origNamedFormats = LocalizationIni.GetNamedFormats(value)
+                translateNamedFormats = LocalizationIni.GetNamedFormats(translateValue)
+                if not LocalizationIni.IsNamedFormatEquals(origNamedFormats, translateNamedFormats):
+                    LocalizationVerifier.__RaiseVerifyError(f'named format seq change - {key}\nFormat original : {LocalizationVerifier.__NamedFormatToString(origNamedFormats)}\nFormat translate : {LocalizationVerifier.__NamedFormatToString(translateNamedFormats)}')
+                if self.lostNewline:
+                    count = len(LocalizationVerifier.__lostNewlineExpr.findall(translateValue))
+                    if count > 0:
+                        print(f"Note: lost newline \\n [{count}] - {key}")
+                if self.spaceBeforeNewline:
+                    count = len(LocalizationVerifier.__spaceBeforeNewlineExpr.findall(translateValue))
+                    if count > 0:
+                        print(f"Note: space before \\n [{count}] - {key}")
+                if self.englishWordsMismatch:
+                    translateCleanValue = LocalizationIni.GetCleanText(translateValue, translateUnnamedFormats, translateNamedFormats)
+                    translateEngWords = LocalizationIni.GetEnglishWords(translateCleanValue)
+                    if len(translateEngWords) > 0:
+                        cleanValue = LocalizationIni.GetCleanText(value, origUnnamedFormats, origNamedFormats)
+                        origEngWords = LocalizationIni.GetEnglishWords(cleanValue)
+                        if not translateEngWords.issubset(origEngWords):
+                            print(f"Note: use undefined word in - {key}")
+                            print("English words original : ", origEngWords)
+                            print("English words translate : ", translateEngWords)
+                            print("English words diff : ", translateEngWords.difference(origEngWords))
+
+    @staticmethod
+    def SetEnableVerifyExceptions(enabled):
+        LocalizationVerifier.__verifyExceptions = enabled
+
+    @staticmethod
+    def SetInteractiveMode(enabled):
+        LocalizationVerifier.__interactiveMode = enabled
+
 

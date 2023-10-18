@@ -15,6 +15,8 @@ def main(args):
         config = configparser.ConfigParser()
         if not config.read('convert.ini'):
             print('Note: No convert config file - convert.ini')
+        LocalizationIni.SetEnableParseExceptions(args.no_errors)
+        LocalizationIni.SetInteractiveMode(False)
         print(f'Process ini {args.input}...')
         inputIni = LocalizationIni.FromIniFile(args.input)
         print('Process reference ini {args.ref}...')
@@ -70,4 +72,5 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--lang', metavar='LANGUAGE', default='uk', help='Input file language locale')
     parser.add_argument('--all-keys', metavar='ENABLED', type=bool, default=True, help='Add all keys from reference ini even they not translated')
     parser.add_argument('--no-split', action='store_true', default=False, help='Disable split output XLSX document')
+    parser.add_argument('--no-errors', action='store_true', default=False, help='Do not allow errors and break after first error')
     sys.exit(main(parser.parse_args()))

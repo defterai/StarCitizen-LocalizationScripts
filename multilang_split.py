@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python
+#!/usr/bin/python
 
 # Convert:
 # - global.ini.xlsx => global_base.ini & global.ini
@@ -19,6 +19,8 @@ def main(args):
                 splitDocuments = splitConfig(config['split-documents']).files
         else:
             print('Note: No convert config file - convert.ini')
+        LocalizationIni.SetEnableParseExceptions(args.no_errors)
+        LocalizationIni.SetInteractiveMode(False)
         print(f'Process multi language {args.file}...')
         inputInis = LocalizationIni.FromMultilang(args.file, splitDocuments)
         print(f'Write output base {args.base}...')
@@ -40,4 +42,5 @@ if __name__ == "__main__":
     parser.add_argument('-b', '--base', metavar='OUT_FILENAME', default='global_base.ini', help='Directs the output of source to a file name of your choice')
     parser.add_argument('-o', '--translate', metavar='OUT_FILENAME', default='global.ini', help='Directs the output of translation to a file name of your choice')
     parser.add_argument('--no-split', action='store_true', default=False, help='Disable support split input documents configured by split-documents section in convert.ini')
+    parser.add_argument('--no-errors', action='store_true', default=False, help='Do not allow errors and break after first error')
     sys.exit(main(parser.parse_args()))

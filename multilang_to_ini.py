@@ -57,14 +57,13 @@ def main(args):
     try:
         print(f'Convert multi language to ini (with ref {args.ref}): {args.files} -> {args.output}')
         splitDocuments = []
-        buildImportIni = False
-        verifyOptions = { 'allowed_characters_file': args.allowed_codepoints, 'interactive_mode': args.interactive }
+        verifyOptions = { 'allowed_characters_file': args.allowed_codepoints }
+        LocalizationIni.SetEnableParseExceptions(args.no_errors)
+        LocalizationIni.SetInteractiveMode(args.interactive)
         config = configparser.ConfigParser()
         if config.read('convert.ini'):
             if 'general' in config:
                 generalConfig = dict(config.items('general'))
-                if 'build_import_ini' in generalConfig:
-                    buildImportIni = IsTruthCondition(generalConfig['build_import_ini'])
                 if 'exclude_translate_keys' in generalConfig:
                     excludeTranslateKeys.update([x.strip() for x in filter(None, generalConfig['exclude_translate_keys'].split(',')) if len(x.strip()) > 0])
             if 'verify' in config:
@@ -73,7 +72,7 @@ def main(args):
                 splitDocuments = splitConfig(config['split-documents']).files
         else:
             print('Note: No convert config file - convert.ini')
-        if not buildImportIni and args.interactive and args.version is None:
+        if not args.build_import and args.interactive and args.version is None:
             version = input('Enter version (optional): ')
         else:
             version = args.version
@@ -96,11 +95,14 @@ def main(args):
                                                                translateIni.getItemsCount() / originalIni.getItemsCount() * 100))
             print('           left: {0}'.format(originalIni.getItemsCount() - translateIni.getItemsCount()))
         if args.check:
-            VerifyTranslationIni(originalIni, translateIni, verifyOptions)
+            print('Check translation...')
+            LocalizationVerifier.SetEnableVerifyExceptions(args.no_errors)
+            LocalizationVerifier.SetInteractiveMode(args.interactive)
+            LocalizationVerifier(verifyOptions).verify(originalIni, translateIni)
         print('Write output...')
         outputIni = LocalizationIni.Empty()
         if referenceIni:
-            if buildImportIni:
+            if args.build_import:
                 print('WARNING: Build import ini mode')
                 for key, value in referenceIni.getItems():
                     if translateIni.isContainKey(key) and value == originalIni.getKeyValue(key):
@@ -145,5 +147,7 @@ if __name__ == "__main__":
     parser.add_argument('--no-ref', action='store_true', default=False, help='Do not use reference global_ref.ini')
     parser.add_argument('--no-outdated-translation', action='store_true', default=False, help='Do not allow outdated translation based on global_ref.ini')
     parser.add_argument('--no-inner-thought', action='store_true', default=False, help='Do not translate known Inner Thought keys (3D font)')
+    parser.add_argument('--no-errors', action='store_true', default=False, help='Do not allow errors and break after first error')
+    parser.add_argument('--build-import', action='store_true', default=False, help='Build import INI with only translation that match global_ref.ini')
     sys.exit(main(parser.parse_args()))
 

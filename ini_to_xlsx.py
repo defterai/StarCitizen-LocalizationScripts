@@ -15,6 +15,8 @@ def main(args):
         config = configparser.ConfigParser()
         if not config.read('convert.ini'):
             print('Note: No convert config file - convert.ini')
+        LocalizationIni.SetEnableParseExceptions(args.no_errors)
+        LocalizationIni.SetInteractiveMode(False)
         print("Process ini...")
         inputIni = LocalizationIni.FromIniFile(args.input)
         if not args.no_split and 'split-documents' in config:
@@ -58,4 +60,5 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--output', metavar='OUT_FILENAME', default='global.ini.xlsx', help='Directs the output to a file name of your choice')
     parser.add_argument('-l', '--lang', metavar='LANGUAGE', default='uk', help='Input file language locale')
     parser.add_argument('--no-split', action='store_true', default=False, help='Disable split output XLSX document')
+    parser.add_argument('--no-errors', action='store_true', default=False, help='Do not allow errors and break after first error')
     sys.exit(main(parser.parse_args()))
