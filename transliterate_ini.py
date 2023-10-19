@@ -13,7 +13,7 @@ def main(args):
         if args.output:
             outputFilename = args.output
         else:
-            outputFilename = 'global.ini.' + args.lang
+            outputFilename = args.input + '.' + args.lang
         print(f'Load {args.input}...')
         inputIni = LocalizationIni.FromIniFile(args.input)
         print(f'Transliterate {args.input}...')

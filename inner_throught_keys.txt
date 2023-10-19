@@ -28,3 +28,4 @@ BarMenu_beer_
 item_Name
 kiosk_Buy
 PIT_Exit_seat
+ui_logout_blocked_

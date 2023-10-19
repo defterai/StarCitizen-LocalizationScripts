@@ -19,7 +19,7 @@ def main(args):
         LocalizationIni.SetInteractiveMode(False)
         print(f'Process ini {args.input}...')
         inputIni = LocalizationIni.FromIniFile(args.input)
-        print('Process reference ini {args.ref}...')
+        print(f'Process reference ini {args.ref}...')
         referenceIni = LocalizationIni.FromIniFile(args.ref)
         if not args.no_split and 'split-documents' in config:
             print("Split ini...")
