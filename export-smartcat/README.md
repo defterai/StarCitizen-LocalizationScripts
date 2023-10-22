@@ -10,8 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: defterai/smartcat-export@master
-      name: Export SmartCat documents
+    - name: Export SmartCat documents
+	  uses: defterai/StarCitizen-LocalizationScripts/export-smartcat@main
       with:
         account_id: ${{ secrets.SMARTCAT_ACCOUNT_ID }}
         auth_key: ${{ secrets.SMARTCAT_API_KEY }}
