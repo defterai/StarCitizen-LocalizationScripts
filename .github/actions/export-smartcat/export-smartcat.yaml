@@ -1,0 +1,34 @@
+name: 'SmartCAT Export'
+author: 'defterai'
+branding:
+  icon: 'archive'
+  color: 'yellow'
+description: 'Export SmartCAT documents to files as workflow action'
+inputs:
+  account_id:
+    description: 'SmartCAT account identifier'
+    required: true
+  auth_key:
+    description: 'SmartCAT auth API key'
+    required: true
+  language_id:
+    description: 'Export document language identifier'
+    required: true
+  documents:
+    description: 'Export document pairs (file name, identifier)'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'  
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+      shell: bash
+    - name: Generate smartCAT Config
+      run: python gen_smartcat_config.py --account-id ${{ inputs.account_id }} --auth-key ${{ inputs.auth_key }} --lang ${{ inputs.language_id }} ${{ inputs.documents }}
+    - name: Export smartCAT Documents
+      run: python export_smartcat.py default
