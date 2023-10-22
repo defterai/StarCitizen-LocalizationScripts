@@ -105,6 +105,7 @@ def export_multilang_csv(document_resource, document_id, output_file_name):
 def main(args):
     result = -1
     try:
+        print('EXPORT smartCAT')
         config = configparser.ConfigParser()
         if not config.read('smartcat.ini'):
             print('Error: Missing config file - smartcat.ini')

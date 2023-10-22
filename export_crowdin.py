@@ -40,6 +40,7 @@ class crowdinConfig:
 def main(args):
     result = -1
     try:
+        print('EXPORT crowdin')
         config = configparser.ConfigParser()
         if not config.read('crowdin.ini'):
             print('Error: Missing config file - crowdin.ini')

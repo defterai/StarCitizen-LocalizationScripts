@@ -53,12 +53,12 @@ def main(args):
             print(f'Save {outputFilename}...')
             outputIni.saveToIniFile(outputFilename)
     except KeyboardInterrupt:
-        input('Interrupted')
+        print('Interrupted')
         return 1
     except Exception as err:
-        input('Error: {0}'.format(err))
+        print('Error: {0}'.format(err))
         return 1
-    input('Done')
+    print('Done')
     return 0
 
 if __name__ == '__main__':
