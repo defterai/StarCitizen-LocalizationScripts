@@ -1,0 +1,39 @@
+name: 'Merge multi-language localization documents into INI'
+author: 'Defter'
+branding:
+  icon: 'archive'
+  color: 'yellow'
+description: 'Merge multi-language localization documents with reference INI'
+inputs:
+  filename:
+    description: 'Output localization INI file name'
+    default: 'global.ini'
+  reference:
+    description: 'Reference localization INI'
+    default: 'global_ref.ini'
+  version:
+    description: 'Version name of localization'
+    default: 'none'
+  document:
+    description: 'Input main document file name'
+    required: true
+  split_documents:
+    description: 'Input split document file name list'
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'  
+    - name: Install Dependencies
+      run: pip install -r multilang-to-ini/requirements.txt
+      shell: bash
+    - name: Generate convert Config
+      run: python gen_convert_config.py ${{ inputs.split_documents }}
+      shell: bash
+    - name: Merge multi-language documents
+      run: python multilang_to_ini.py --output=${{ inputs.filename }} --ref=${{ inputs.reference }} --version=${{ inputs.version }} --no-inner-thought ${{ inputs.document }}
+      shell: bash
