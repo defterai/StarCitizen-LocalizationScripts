@@ -30,5 +30,7 @@ runs:
       shell: bash
     - name: Generate smartCAT Config
       run: python gen_smartcat_config.py --account-id ${{ inputs.account_id }} --auth-key ${{ inputs.auth_key }} --lang ${{ inputs.language_id }} ${{ inputs.documents }}
+      shell: bash
     - name: Export smartCAT Documents
       run: python export_smartcat.py default
+      shell: bash
