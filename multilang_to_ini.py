@@ -85,8 +85,8 @@ def main(args):
             originalIni = inputInis[0]
             translateIni = inputInis[1]
         elif len(args.files) == 2:
-            originalIni = args.files[0]
-            translateIni = args.files[1]
+            originalIni = LocalizationIni.FromIniFile(args.files[0])
+            translateIni = LocalizationIni.FromIniFile(args.files[1])
         else:
             print(f'Error: Too many input files specified - {args.files}')
             return 1
