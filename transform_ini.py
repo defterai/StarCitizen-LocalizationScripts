@@ -8,6 +8,7 @@ charactersMap = dict({
     # Fix missing in font characters
     '«': '"',
     '»': '"',
+    'µ': 'μ',
     # Ukraininan cyryllic
     'ґ': 'г',
     'Ґ': 'Г',
