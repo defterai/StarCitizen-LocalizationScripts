@@ -14,15 +14,24 @@ versionFormat = ' - v{0}'
 versionAddKeys = set(['pause_ForegroundMainMenuScreenName'])
 excludeTranslateKeys = set(['mobiGlas_ui_notification_Party_Title'])
 innerThroughtKeys = None
+innerThroughtExcludeKeys = None
+
+def isInnerThroughtExcludeKey(key):
+    for excludeInnerThroughtKey in innerThroughtExcludeKeys:
+        if key.startswith(excludeInnerThroughtKey):
+            return True
+    return False
 
 def isInnerThroughtKey(key):
-    global innerThroughtKeys
+    global innerThroughtKeys, innerThroughtExcludeKeys
     if innerThroughtKeys is None:
         with open("inner_throught_keys.txt", "r") as f:
-            innerThroughtKeys = f.read().splitlines() 
+            keyRules = f.read().splitlines()
+            innerThroughtKeys = [x[1:] for x in keyRules if x.startswith('+')]
+            innerThroughtExcludeKeys = [x[1:] for x in keyRules if x.startswith('-')]
     for innerThroughtKey in innerThroughtKeys:
         if key.startswith(innerThroughtKey):
-            return True
+            return not isInnerThroughtExcludeKey(key)
     return False
 
 def compareFormats(refValue, origValue):
