@@ -16,7 +16,6 @@
 +Hints_Interaction_Condition_
 +interaction_
 +vehicle_interactor_
-+elevator_
 +Admin_
 +Bartender_Convo_
 +Darneely_Convo_
