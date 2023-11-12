@@ -9,9 +9,15 @@ Star Citizen localization scripts for automate download localization from CAT an
 
 # Prepare scripts envirovement
 
-- Install requirements
-  > pip install -r requirements.txt
-- Generate CAT config by python script
-  > gen_smartcat_config.py global.ini.xlsx <document_id> --account-id <id> --auth-key <key>
-- Generate convert config by python script
-  > gen_convert_config.py global.ini
+- Install requirements  
+  ```
+  pip install -r requirements.txt
+  ```
+- Generate CAT config by python script  
+  ```
+  gen_smartcat_config.py global.ini.xlsx <document_id> --account-id <id> --auth-key <key>
+  ```
+- Generate convert config by python script  
+  ```
+  gen_convert_config.py global.ini
+  ```
