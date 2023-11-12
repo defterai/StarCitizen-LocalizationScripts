@@ -34,6 +34,8 @@
 +Greeter_
 +text_music_
 +item_Name
+-item_NameDrink
+-item_NameFood
 +PIT_Exit_seat
 +ui_logout_blocked_
 +Interaction_eat
@@ -54,6 +56,7 @@
 -ui_interactor_B7
 -ui_interactor_B8
 -ui_interactor_B9
+-ui_interactor_call_shuttle
 -ui_interactor_cargodeck_
 -ui_interactor_dockingport_
 -ui_interactor_drake_001
@@ -61,6 +64,9 @@
 -ui_interactor_elevator_roof
 -ui_interactor_floor_
 -ui_interactor_garage_
+-ui_interactor_generic_floor
+-ui_interactor_generic_foyer
+-ui_interactor_generic_main
 -ui_interactor_ground_floor
 -ui_interactor_hangar_
 -ui_interactor_IAE2950_
@@ -73,6 +79,7 @@
 -ui_interactor_pad_
 -ui_interactor_rsi_001
 -ui_interactor_secdock_
+-ui_interactor_surface_level
 -ui_interactor_shuttle_called
 -ui_interactor_ST
 -ui_interactor_sublevel_
