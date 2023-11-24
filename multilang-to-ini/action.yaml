@@ -29,14 +29,11 @@ runs:
       with:
         python-version: '3.10'  
     - name: Install Dependencies
-      run: pip install -r requirements.txt
-      working-directory: multilang-to-ini
+      run: pip install -r "${{ github.action_path }}/requirements.txt"
       shell: bash
     - name: Generate convert Config
-      run: python gen_convert_config.py ${{ inputs.split_documents }}
-      working-directory: .
+      run: python "${{ github.action_path }}/../gen_convert_config.py" ${{ inputs.split_documents }}
       shell: bash
     - name: Merge multi-language documents
-      run: python multilang_to_ini.py --output=${{ inputs.filename }} --ref=${{ inputs.reference }} --version=${{ inputs.version }} --no-inner-thought ${{ inputs.document }}
-      working-directory: .
+      run: python "${{ github.action_path }}/../multilang_to_ini.py" --output=${{ inputs.filename }} --ref=${{ inputs.reference }} --version=${{ inputs.version }} --no-inner-thought ${{ inputs.document }}
       shell: bash
