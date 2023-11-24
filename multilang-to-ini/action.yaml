@@ -35,5 +35,8 @@ runs:
       run: python "${{ github.action_path }}/../gen_convert_config.py" ${{ inputs.split_documents }}
       shell: bash
     - name: Merge multi-language documents
-      run: python "${{ github.action_path }}/../multilang_to_ini.py" --output=${{ inputs.filename }} --ref=${{ inputs.reference }} --version=${{ inputs.version }} --no-inner-thought ${{ inputs.document }}
+      run: python "${{ github.action_path }}/../multilang_to_ini.py" ${{ inputs.document }} --output=${{ inputs.filename }} --ref=${{ inputs.reference }} --version=${{ inputs.version }} --no-inner-thought
+      shell: bash
+    - name: Transform INI
+      run: python "${{ github.action_path }}/../transform_ini.py" ${{ inputs.filename }} -o ${{ inputs.filename }}
       shell: bash
