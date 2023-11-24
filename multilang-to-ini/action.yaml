@@ -36,7 +36,7 @@ runs:
       shell: bash
     - name: Merge multi-language documents
       run: |
-        cp "${{ github.action_path }}/inner_throught_keys.txt" .
+        cp "${{ github.action_path }}/../inner_throught_keys.txt" .
         python "${{ github.action_path }}/../multilang_to_ini.py" ${{ inputs.document }} --output=${{ inputs.filename }} --ref=${{ inputs.reference }} --version=${{ inputs.version }} --no-inner-thought
       shell: bash
     - name: Transform INI
