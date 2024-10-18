@@ -289,7 +289,7 @@ class LocalizationIni:
             line = key + LocalizationIni.__delimiter + value
             outputData.append(line)
         dataFrame = pandas.DataFrame(outputData, columns=[ 'A' ])
-        dataFrame.to_excel(filename, sheet_name=sheetName, encoding='utf8', index=False, header=False)
+        dataFrame.to_excel(filename, sheet_name=sheetName, index=False, header=False)
 
     @staticmethod
     def GetKeyValueText(key, value):
@@ -374,7 +374,7 @@ class MultiLangXlsx:
 
     def saveToXlsxFile(self, filename, sheetName):
         dataFrame = pandas.DataFrame(self.data, columns=[ 'A', 'B' ])
-        dataFrame.to_excel(filename, sheet_name=sheetName, encoding='utf8', index=False, header=False)
+        dataFrame.to_excel(filename, sheet_name=sheetName, index=False, header=False)
 
 class LocalizationVerifier:
     __lostNewlineExpr = re.compile(r'[^\\]\\[^n\\]')
